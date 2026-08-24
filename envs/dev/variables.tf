@@ -13,13 +13,13 @@ variable "jwt_secret" {
 variable "github_org" {
   description = "GitHub username or organization"
   type        = string
-  default     = "EnohRoland"   # filled in Lab 5
+  default     = "EnohRoland" # filled in Lab 5
 }
 
 variable "github_org_id" {
   description = "Numeric GitHub org/owner ID"
   type        = string
-  default     = " 320181056"   # filled in Lab 5
+  default     = " 320181056" # filled in Lab 5
 }
 
 variable "github_repo_ids" {
@@ -27,9 +27,9 @@ variable "github_repo_ids" {
   type        = map(string)
 
   default = {
-    "zen-roland-infra"        = "1343724092"
-    "roland-zen-backend-lab1" = "1344126819"
+    "zen-roland-infra"         = "1343724092"
+    "roland-zen-backend-lab1"  = "1344126819"
     "roland-zen-phama-backend" = "1344126169"
-    "roland-zen-frontend"     = "1344127987"
+    "roland-zen-frontend"      = "1344127987"
   }
 }
