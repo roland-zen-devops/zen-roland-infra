@@ -24,10 +24,8 @@ on:
         required: true
         default: 'plan'
         type: choice
-        options:
-          - plan
-          - apply
-          - destroy
+        options: ['plan', 'apply', 'destroy']
+         
 
       confirm_destroy:
         description: 'Type "destroy" to confirm destruction'
