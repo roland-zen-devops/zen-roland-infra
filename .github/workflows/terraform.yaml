@@ -25,7 +25,6 @@ on:
         default: 'plan'
         type: choice
         options: ['plan', 'apply', 'destroy']
-         
 
       confirm_destroy:
         description: 'Type "destroy" to confirm destruction'
@@ -55,6 +54,11 @@ jobs:
   plan:
     name: Terraform Plan
     runs-on: ubuntu-latest
+
+    # Do NOT run plan when manual action = destroy
+    if: |
+      github.event_name != 'workflow_dispatch' ||
+      github.event.inputs.action != 'destroy'
 
     defaults:
       run:
