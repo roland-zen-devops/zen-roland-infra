@@ -1,0 +1,25 @@
+flowchart LR
+  Change["Application change"] --> PR["Pull request"]
+  PR --> Tests["Tests and quality checks"]
+  Tests --> Build["Build container"]
+  Build --> Scan["Vulnerability scan"]
+  Scan --> Push["Push SHA tag to ECR"]
+  Push --> Sign["Cosign signature"]
+  Sign --> GPR["GitOps values PR"]
+  GPR --> Review["Human dev approval"]
+  Review --> Argo["Argo CD sync"]
+  Argo --> Rollout["Kubernetes rolling update"]
+  Rollout --> Ready{"Ready and healthy?"}
+  Ready -->|Yes| Evidence["Record validation evidence"]
+  Ready -->|No| Diagnose["Events, probes, logs, endpoints"]
+  Diagnose --> Fix["Fix owning repository"]
+  Fix --> PR
+
+  classDef action fill:#e8f0fe,stroke:#2457a6,color:#111;
+  classDef gate fill:#fff3d6,stroke:#9a6700,color:#111;
+  classDef good fill:#e8f5e9,stroke:#2e7d32,color:#111;
+  classDef bad fill:#fce8e6,stroke:#b3261e,color:#111;
+  class Change,PR,Tests,Build,Scan,Push,Sign,GPR,Argo,Rollout action;
+  class Review,Ready gate;
+  class Evidence good;
+  class Diagnose,Fix bad;
