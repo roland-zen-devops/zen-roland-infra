@@ -68,6 +68,21 @@ module "iam" {
   github_org        = var.github_org
   github_org_id     = var.github_org_id
   github_repo_ids   = var.github_repo_ids
+  github_actions_repositories = {
+    "roland-zen-phama-backend"  = "1344126819"
+    "roland-zen-phama-frontend" = "1344126169"
+  }
+  github_actions_ecr_repositories = [
+    "api-gateway",
+    "auth-service",
+    "drug-catalog-service",
+    "inventory-service",
+    "manufacturing-service",
+    "notification-service",
+    "pharma-ui",
+    "qc-service",
+    "supplier-service",
+  ]
 }
 module "secrets_manager" {
   source = "../../modules/secret-manager"

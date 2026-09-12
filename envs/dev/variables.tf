@@ -13,7 +13,7 @@ variable "jwt_secret" {
 variable "github_org" {
   description = "GitHub username or organization"
   type        = string
-  default     = "EnohRoland" # filled in Lab 5
+  default     = "roland-zen-devops"
 }
 
 variable "github_org_id" {

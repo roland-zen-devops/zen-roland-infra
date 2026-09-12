@@ -1,1 +1,3 @@
 envs/dev/.terraform
+.work/
+patches/
