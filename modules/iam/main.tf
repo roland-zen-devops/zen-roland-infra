@@ -230,6 +230,7 @@ resource "aws_iam_policy" "alb_controller_policy" {
           "elasticloadbalancing:DeleteListener",
           "elasticloadbalancing:CreateRule",
           "elasticloadbalancing:DeleteRule",
+          "elasticloadbalancing:SetRulePriorities",
           "elasticloadbalancing:AddTags",
           "elasticloadbalancing:RemoveTags",
           "elasticloadbalancing:ModifyLoadBalancerAttributes",
