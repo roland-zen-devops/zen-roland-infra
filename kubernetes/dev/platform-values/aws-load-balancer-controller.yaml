@@ -1,0 +1,21 @@
+clusterName: pharma-dev-cluster
+region: us-east-1
+vpcId: vpc-0ee0ea7c821090976
+replicaCount: 2
+
+serviceAccount:
+  create: true
+  name: aws-load-balancer-controller
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::651706754162:role/pharma-dev-alb-controller-role
+
+podDisruptionBudget:
+  minAvailable: 1
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
