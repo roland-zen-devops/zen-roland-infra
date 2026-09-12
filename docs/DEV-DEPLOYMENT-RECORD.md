@@ -1,5 +1,9 @@
 # Dev Deployment Record
 
+> Historical record: this deployment was intentionally destroyed on 2026-09-12.
+> See [Dev Teardown Record](DEV-TEARDOWN-RECORD.md) for preserved assets and the
+> redeployment procedure.
+
 ## Deployment status
 
 | Item | Result |
