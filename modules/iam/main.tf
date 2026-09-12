@@ -260,3 +260,86 @@ resource "aws_iam_role_policy_attachment" "alb_controller_policy_attachment" {
   role       = aws_iam_role.alb_controller_role.name
   policy_arn = aws_iam_policy.alb_controller_policy.arn
 }
+
+# GitHub Actions uses short-lived OIDC credentials to publish signed dev images.
+resource "aws_iam_openid_connect_provider" "github_actions" {
+  url = "https://token.actions.githubusercontent.com"
+
+  client_id_list = ["sts.amazonaws.com"]
+
+  tags = {
+    Name    = "github-actions"
+    Env     = var.env
+    Project = var.project
+  }
+}
+
+data "aws_iam_policy_document" "github_actions_assume_role" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+
+    principals {
+      identifiers = [aws_iam_openid_connect_provider.github_actions.arn]
+      type        = "Federated"
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+
+    condition {
+      test     = "StringLike"
+      variable = "token.actions.githubusercontent.com:sub"
+      values = [
+        for repository, repository_id in var.github_actions_repositories :
+        "repo:${var.github_org}@${trimspace(var.github_org_id)}/${repository}@${repository_id}:*"
+      ]
+    }
+  }
+}
+
+resource "aws_iam_role" "github_actions" {
+  name                 = "${var.project}-${var.env}-github-actions-role"
+  assume_role_policy   = data.aws_iam_policy_document.github_actions_assume_role.json
+  max_session_duration = 3600
+
+  tags = {
+    Name    = "${var.project}-${var.env}-github-actions-role"
+    Env     = var.env
+    Project = var.project
+  }
+}
+
+data "aws_iam_policy_document" "github_actions_ecr" {
+  statement {
+    sid       = "EcrLogin"
+    actions   = ["ecr:GetAuthorizationToken"]
+    resources = ["*"]
+  }
+
+  statement {
+    sid = "PublishDevImages"
+    actions = [
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:BatchGetImage",
+      "ecr:CompleteLayerUpload",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:InitiateLayerUpload",
+      "ecr:PutImage",
+      "ecr:UploadLayerPart",
+    ]
+    resources = [
+      for repository in var.github_actions_ecr_repositories :
+      "arn:aws:ecr:*:${var.aws_account_id}:repository/${repository}"
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "github_actions_ecr" {
+  name   = "${var.project}-${var.env}-ecr-publisher"
+  role   = aws_iam_role.github_actions.id
+  policy = data.aws_iam_policy_document.github_actions_ecr.json
+}

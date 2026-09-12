@@ -37,3 +37,13 @@ variable "github_repo_ids" {
   description = "Map of GitHub repo name to its numeric GitHub repository ID. Fetch via: curl https://api.github.com/repos/<github_org>/<repo>"
   type        = map(string)
 }
+
+variable "github_actions_repositories" {
+  description = "Map of repository names to immutable GitHub IDs allowed to assume the Actions role"
+  type        = map(string)
+}
+
+variable "github_actions_ecr_repositories" {
+  description = "ECR repositories to which GitHub Actions may publish images"
+  type        = set(string)
+}
