@@ -10,6 +10,14 @@ The scope is strictly the `dev` environment. Nothing in this guide authorizes a
 QA or production deployment. Commands that change cloud or cluster state must be
 reviewed before execution.
 
+### Complete project diagram
+
+The attached diagram below shows the entire system from source repositories and
+CI/CD through AWS infrastructure, Kubernetes controllers, workloads, secrets, and
+the database. Open the image directly when you need to zoom in.
+
+[![Zen Pharma complete dev architecture](diagrams/zen-pharma-dev-architecture.png)](diagrams/zen-pharma-dev-architecture.png)
+
 ### Contents
 
 1. Purpose and scope
@@ -192,6 +200,8 @@ not fall through to the UI.
 
 ## 6. Identity and secret flow
 
+[![Zen Pharma secret flow](diagrams/secret-flow.png)](diagrams/secret-flow.png)
+
 ```mermaid
 sequenceDiagram
     participant Pod as ESO pod
@@ -253,6 +263,8 @@ GitHub OIDC role. Company-standard hardening should migrate this workflow to OID
 with `id-token: write` and `role-to-assume`, then delete the long-lived AWS keys.
 
 ## 8. Application image delivery flow
+
+[![Zen Pharma application delivery flow](diagrams/delivery-flow.png)](diagrams/delivery-flow.png)
 
 ```mermaid
 flowchart LR

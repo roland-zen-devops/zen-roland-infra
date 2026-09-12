@@ -1,0 +1,89 @@
+flowchart TB
+  User["Developer / Dev user"]
+
+  subgraph GitHub["GitHub organization: roland-zen-devops"]
+    Backend["roland-zen-phama-backend<br/>8 services + image workflows"]
+    Frontend["roland-zen-phama-frontend<br/>React UI + image workflow"]
+    Infra["zen-roland-infra<br/>Terraform + platform configuration"]
+    GitOps["zen-gitops<br/>Helm values + Argo CD applications"]
+    Training["workflow-intro<br/>Training examples only"]
+  end
+
+  subgraph AWS["AWS account 651706754162 / us-east-1"]
+    TFState["S3 Terraform state"]
+    ECR["Amazon ECR<br/>9 scanned and signed images"]
+    Secrets["AWS Secrets Manager<br/>DB and JWT secrets"]
+    IAM["IAM + OIDC + IRSA roles"]
+
+    subgraph VPC["VPC 10.0.0.0/16 across us-east-1a and us-east-1b"]
+      subgraph Public["Public subnets 10.0.1.0/24 + 10.0.2.0/24"]
+        ALB["Internet-facing ALB<br/>HTTP :80"]
+        NAT["NAT Gateway"]
+      end
+
+      subgraph Private["Private app subnets 10.0.3.0/24 + 10.0.4.0/24"]
+        subgraph EKS["EKS pharma-dev-cluster / namespace dev"]
+          UI["pharma-ui :80"]
+          Gateway["api-gateway :8080"]
+          Auth["auth-service :8081"]
+          Catalog["drug-catalog :8082"]
+          Inventory["inventory :8083"]
+          Supplier["supplier :8084"]
+          Manufacturing["manufacturing :8085"]
+          QC["qc-service :8086"]
+          Notification["notification :3000"]
+          Argo["Argo CD"]
+          ESO["External Secrets Operator"]
+          LBC["AWS Load Balancer Controller"]
+          Metrics["Metrics Server"]
+        end
+      end
+
+      subgraph Database["Database subnets 10.0.5.0/24 + 10.0.6.0/24"]
+        RDS["Private RDS PostgreSQL 17.9<br/>:5432"]
+      end
+    end
+  end
+
+  User -->|"Git changes and approvals"| GitHub
+  User -->|"Browser HTTP request"| ALB
+  Backend -->|"CI: test, build, scan, push, sign"| ECR
+  Frontend -->|"CI: test, build, scan, push, sign"| ECR
+  Infra -->|"Terraform plan/apply"| TFState
+  Infra -->|"Creates AWS foundation"| AWS
+  GitOps -->|"Desired workload state"| Argo
+  ECR -->|"Image pulls"| EKS
+  Argo -->|"Helm reconciliation"| UI
+  Argo -->|"Helm reconciliation"| Gateway
+  Argo -->|"Helm reconciliation"| Auth
+  LBC -->|"Reconciles ingress"| ALB
+  ALB -->|"/ route, order 20"| UI
+  ALB -->|"/api route, order 10"| Gateway
+  UI -->|"API calls"| Gateway
+  Gateway --> Auth
+  Gateway --> Catalog
+  Gateway --> Inventory
+  Gateway --> Supplier
+  Gateway --> Manufacturing
+  Gateway --> QC
+  Gateway --> Notification
+  Auth --> RDS
+  Catalog --> RDS
+  Inventory --> RDS
+  Supplier --> RDS
+  Manufacturing --> RDS
+  ESO -->|"GetSecretValue via IRSA"| Secrets
+  ESO -->|"Kubernetes Secrets"| EKS
+  IAM -. "short-lived identity" .-> ESO
+  IAM -. "short-lived identity" .-> LBC
+  EKS -->|"outbound updates/image access"| NAT
+  Training -. "learning reference" .-> Backend
+
+  classDef repo fill:#e8f0fe,stroke:#2457a6,color:#111;
+  classDef aws fill:#fff3d6,stroke:#9a6700,color:#111;
+  classDef app fill:#e8f5e9,stroke:#2e7d32,color:#111;
+  classDef data fill:#fce8e6,stroke:#b3261e,color:#111;
+  class Backend,Frontend,Infra,GitOps,Training repo;
+  class TFState,ECR,Secrets,IAM,ALB,NAT aws;
+  class UI,Gateway,Auth,Catalog,Inventory,Supplier,Manufacturing,QC,Notification,Argo,ESO,LBC,Metrics app;
+  class RDS data;
